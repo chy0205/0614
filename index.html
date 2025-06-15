@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        background: white;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      .title-marquee-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: 80%;
+        max-width: 900px;
+        margin: 20px auto;
+        gap: 20px;
+      }
+
+      h1#pageTitle {
+        font-size: 28px;
+        color: #333;
+        margin: 0;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .marquee-container {
+        flex-grow: 1;
+        height: 60px;
+        border: 2px solid #333;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f9f9f9;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        box-sizing: border-box;
+      }
+
+      .marquee {
+        white-space: nowrap;
+        font-size: 28px;
+        color: #000;
+        padding-left: 100%;
+        animation-timing-function: linear;
+        animation-iteration-count: 1;
+      }
+
+      @keyframes marquee {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-100%);
+        }
+      }
+
+      .page-info {
+        margin-top: 10px;
+        font-size: 18px;
+        color: #555;
+      }
+
+      .controls {
+        margin-top: 15px;
+      }
+
+      .controls button,
+      .controls input {
+        padding: 6px 12px;
+        font-size: 16px;
+        margin: 0 5px 5px 5px;
+        cursor: pointer;
+      }
+
+      .fullscreen-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 14px;
+        padding: 5px 10px;
+      }
+
+      input[type="number"] {
+        width: 90px;
+        text-align: center;
+      }
+
+      #listArea {
+        margin-top: 20px;
+        max-width: 900px;
+        width: 80%;
+        text-align: left;
+        background: #fafafa;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        word-break: break-word;
+        overflow-wrap: break-word;
+      }
+
+      #listContent span {
+        display: inline-block;
+        margin-right: 2px;
+        white-space: nowrap;
+        font-size: 16px;
+        color: #333;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="title-marquee-wrapper">
+      <h1 id="pageTitle">未點名</h1>
+      <div class="marquee-container">
+        <div id="marquee" class="marquee">載入中...</div>
+      </div>
+    </div>
+
+    <div class="page-info">
+      <span id="pageNumber"></span>
+      &nbsp;&nbsp;&nbsp;
+      <label for="durationInput">秒數(10~300)：</label>
+      <input type="number" id="durationInput" min="10" max="300" step="0.1" />
+      <button onclick="resetDuration()">重置秒數</button>
+      <br />
+      <span
+        id="countdown"
+        style="font-size: 14px; color: #888; margin-top: 8px; display: inline-block"
+      >
+        距離更新：-- 秒
+      </span>
+    </div>
+
+    <div class="controls">
+      <button type="button" onclick="loadData()">🔄 手動更新</button>
+      <button class="fullscreen-button" onclick="toggleFullscreen()">🖥️ 全螢幕</button>
+    </div>
+
+    <div id="listArea">
+      <strong>名單：</strong>
+      <div id="listContent"></div>
+    </div>
+
+    <script>
+      let allItems = [];
+      let manualDuration = null;
+      let currentDuration = null;
+
+      const durationInput = document.getElementById("durationInput");
+      const pageNumber = document.getElementById("pageNumber");
+      const marquee = document.getElementById("marquee");
+      const countdownEl = document.getElementById("countdown");
+      const listContent = document.getElementById("listContent");
+      const pageTitle = document.getElementById("pageTitle");
+
+      let countdownInterval;
+      let countdownRemaining = 0;
+
+      // 你的公開CSV連結
+      const SPREADSHEET_CSV_URL =
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTujCzII9O3UmEy3PzyPihnzIpn7geyFPH6hTGNqMJXaeKlzJQngSGYGqq-OHeMvUBccpOhae8hSQeF/pub?output=csv";
+
+      function updateCountdownDisplay() {
+        countdownEl.textContent = `距離更新：${countdownRemaining} 秒`;
+      }
+
+      function startCountdown(durationSeconds) {
+        clearInterval(countdownInterval);
+        countdownRemaining = Math.ceil(durationSeconds);
+        updateCountdownDisplay();
+
+        countdownInterval = setInterval(() => {
+          countdownRemaining--;
+          if (countdownRemaining <= 0) {
+            countdownRemaining = 0;
+            clearInterval(countdownInterval);
+          }
+          updateCountdownDisplay();
+        }, 1000);
+      }
+
+      function updateMarquee() {
+        if (allItems.length === 0) {
+          marquee.textContent = "目前沒有資料";
+          pageNumber.textContent = "";
+          durationInput.value = "";
+          marquee.style.animation = "none";
+          countdownEl.textContent = "距離更新：-- 秒";
+          listContent.innerHTML = "";
+          return;
+        }
+
+        const text = " " + allItems.join(" ｜ ");
+
+        let durationSeconds;
+        if (manualDuration !== null) {
+          durationSeconds = manualDuration;
+        } else {
+          durationSeconds = Math.min(300, Math.max(10, text.length / 15));
+        }
+        currentDuration = durationSeconds;
+
+        marquee.style.animation = "none";
+        void marquee.offsetWidth;
+        marquee.style.animation = `marquee ${durationSeconds}s linear 1`;
+        marquee.textContent = text;
+
+        pageNumber.textContent = "";
+        durationInput.value = durationSeconds.toFixed(1);
+
+        startCountdown(durationSeconds);
+
+        listContent.innerHTML = allItems
+          .map((item) => `<span>${item}、</span>`)
+          .join("");
+      }
+
+      marquee.onanimationend = () => {
+        loadData();
+      };
+
+      async function loadData() {
+        try {
+          const response = await fetch(SPREADSHEET_CSV_URL);
+          if (!response.ok) throw new Error("抓取資料失敗");
+          const csvText = await response.text();
+
+          const lines = csvText.trim().split("\n");
+          const title = lines[0]?.split(",")[0] || "跑馬燈";
+          const items = lines
+            .slice(1)
+            .map((line) => line.split(",")[0])
+            .filter((s) => s);
+
+          pageTitle.textContent = title;
+          allItems = items;
+          updateMarquee();
+        } catch (error) {
+          console.error(error);
+          pageTitle.textContent = "載入資料錯誤";
+          allItems = [];
+          updateMarquee();
+        }
+      }
+
+      durationInput.addEventListener("change", () => {
+        const val = Number(durationInput.value);
+        if (isNaN(val) || val < 10 || val > 300) {
+          alert("請輸入 10 到 300 秒的有效數字");
+          durationInput.value = currentDuration.toFixed(1);
+          return;
+        }
+        manualDuration = val;
+        updateMarquee();
+      });
+
+      function resetDuration() {
+        manualDuration = null;
+        updateMarquee();
+      }
+
+      function toggleFullscreen() {
+        const docEl = document.documentElement;
+        if (!document.fullscreenElement) {
+          docEl.requestFullscreen?.();
+        } else {
+          document.exitFullscreen?.();
+        }
+      }
+
+      window.onload = () => {
+        loadData();
+      };
+    </script>
+  </body>
+</html>
