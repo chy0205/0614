@@ -29,7 +29,7 @@
         justify-content: center;
         align-items: center;
         margin-top: 40px;
-        gap: 1px;
+        gap: 0px; /* 將這裡改為 0px，或直接刪除這行 */
       }
 
       .reel-box {
@@ -41,6 +41,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        background-color: rgba(255, 255, 255, 0.8); /* 半透明白色背景，讓內容更清晰 */
         color: #333; /* 文字顏色 */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 輕微陰影效果 */
       }
@@ -86,6 +87,8 @@
         font-size: 18px;
         color: #333;
         font-weight: bold; /* 加粗結果文字 */
+        /* 因為您不再使用此區塊，您可以考慮將其隱藏或完全移除 */
+        /* display: none; */ 
       }
 
       #result b {
@@ -117,6 +120,7 @@
     <h1>1</h1>
     <h1>2</h1>
     <h1>2</h1>
+    <h1>2</h1>
 
     <div class="slot-machine-wrapper">
       <div id="areaReel" class="reel-box">--</div>
@@ -136,7 +140,7 @@
     <button id="resetHistoryButton" onclick="resetHistory()">清除紀錄</button>
     <button id="restartButton" onclick="restartAll()">🔄 重新開始</button>
 
-    <div id="result"></div>
+    <div id="result"></div> 
     <div id="history"><strong>🎯 抽選紀錄：</strong></div>
 
     <script>
@@ -164,12 +168,13 @@
         "崇正": ["區"], // 特殊處理：只有「區」字，表示沒有數字編號
         "通化": ["001區", "002區", "003區", "005區"],
         "華德": ["001區", "002區", "003區", "004區", "005區", "006區"],
+        "精明": ["001區", "002區", "011區", "013區", "018區", "022區", "024區"],
         "賢德": ["001區", "002區", "003區"]
       };
 
       // 直接使用您提供的 areaNames
       let areaNames = [
-        "大德", "中和", "文化傳播", "正宗", "崇正", "通化", "華德", "賢德"
+        "大德", "中和", "文化傳播", "正宗", "崇正", "通化", "華德", "精明", "賢德"
       ];
 
       // 將 areaMap 裡的每個編號列表進行排序 (可選，但讓抽選更有序)
@@ -204,7 +209,8 @@
       function startDraw() {
         document.getElementById('drawButton').disabled = true;
         document.getElementById('retryNumberButton').disabled = true;
-        document.getElementById('result').innerHTML = '';
+        // 清空結果顯示
+        document.getElementById('result').innerHTML = ''; 
         document.getElementById('areaReel').innerText = '--';
         document.getElementById('numberReel').innerText = '--';
         playSpinSound(); // 開始播放聲音
@@ -254,8 +260,6 @@
             areaReel.innerText = finalArea;
             lastSelectedArea = finalArea; // 記錄最終選中的區域
             
-            // 區域轉動結束，這裡可以停止聲音，因為接下來是編號轉動
-            // 如果希望兩個輪盤轉動都共用同一個聲音，則在 spinNumber 開始時再次播放
             stopSpinSound(); 
             
             spinNumber(finalArea); // 接著轉動編號
@@ -286,7 +290,7 @@
           const historyDiv = document.getElementById('history');
           historyDiv.scrollTop = historyDiv.scrollHeight;
 
-          document.getElementById('result').innerHTML = `👉 選中單位：<b>${area}</b> (單一單位)`;
+          // 移除了 document.getElementById('result').innerHTML 的更新
           document.getElementById('drawButton').disabled = false;
           document.getElementById('retryNumberButton').disabled = true; // 單一單位無法重抽
           stopSpinSound(); // 停止聲音
@@ -300,6 +304,7 @@
 
         if (remainingNumbersWithSuffix.length === 0) {
           numberReel.innerText = '已抽完';
+          // 這裡保留了已抽完的提示，因為這是一個重要的狀態訊息
           document.getElementById('result').innerHTML = `⚠️ <b>${area}</b> 的編號已全部抽完，請按「重新開始」重置`;
           document.getElementById('drawButton').disabled = false;
           document.getElementById('retryNumberButton').disabled = true; // 該區域已抽完，無法重抽
@@ -335,11 +340,7 @@
             const historyDiv = document.getElementById('history');
             historyDiv.scrollTop = historyDiv.scrollHeight;
 
-            //document.getElementById('result').innerHTML = `
-            //  👉 選中單位：<b>${area}</b><br>
-            //  👉 編號：<b>${finalNumberWithSuffix}</b>
-            `;
-
+            // 移除了 document.getElementById('result').innerHTML 的更新
             document.getElementById('drawButton').disabled = false; // 啟用開始抽選按鈕
             document.getElementById('retryNumberButton').disabled = false; // 啟用重抽按鈕
             stopSpinSound(); // 停止聲音
@@ -361,7 +362,8 @@
             return;
         }
 
-        document.getElementById('result').innerHTML = '';
+        // 清空結果顯示 (在重抽前也應該清空)
+        document.getElementById('result').innerHTML = ''; 
         document.getElementById('numberReel').innerText = '--';
         document.getElementById('drawButton').disabled = true;
         document.getElementById('retryNumberButton').disabled = true;
@@ -390,7 +392,7 @@
         lastSelectedArea = null; // 清空上次選中的區域
         document.getElementById('areaReel').innerText = '--';
         document.getElementById('numberReel').innerText = '--';
-        document.getElementById('result').innerHTML = '';
+        document.getElementById('result').innerHTML = ''; // 確保重新開始時也清空
         document.getElementById('history').innerHTML = '<strong>🎯 抽選紀錄：</strong>';
         document.getElementById('drawButton').disabled = false; // 啟用開始抽選按鈕
         document.getElementById('retryNumberButton').disabled = true; // 禁用重抽按鈕
