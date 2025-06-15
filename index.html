@@ -279,15 +279,15 @@
               drawnMap[area].push('單一單位');
           }
 
-          document.getElementById('history').innerHTML += `
-            <div>🔹 <b>${area}</b> (單一單位)</div>
-          `;
+          //document.getElementById('history').innerHTML += `
+          //  <div>🔹 <b>${area}</b> (單一單位)</div>
+          //`;
           const historyDiv = document.getElementById('history');
           historyDiv.scrollTop = historyDiv.scrollHeight;
 
-          /*document.getElementById('result').innerHTML = `👉 選中單位：<b>${area}</b> (單一單位)`;
-          document.getElementById('drawButton').disabled = false;
-          document.getElementById('retryNumberButton').disabled = true; // 單一單位無法重抽*/
+          //document.getElementById('result').innerHTML = `👉 選中單位：<b>${area}</b> (單一單位)`;
+          //document.getElementById('drawButton').disabled = false;
+          //document.getElementById('retryNumberButton').disabled = true; // 單一單位無法重抽
           stopSpinSound(); // 停止聲音
           return;
         }
@@ -333,10 +333,6 @@
             // 使歷史記錄滾動到底部
             const historyDiv = document.getElementById('history');
             historyDiv.scrollTop = historyDiv.scrollHeight;
-
-            /*document.getElementById('result').innerHTML = `
-              👉 選中單位：<b>${area}</b><br>
-              👉 編號：<b>${finalNumberWithSuffix}</b>*/
             `;
 
             document.getElementById('drawButton').disabled = false; // 啟用開始抽選按鈕
