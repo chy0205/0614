@@ -2,286 +2,268 @@
 <html>
   <head>
     <base target="_top" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       body {
-        margin: 0;
-        padding: 20px;
         font-family: Arial, sans-serif;
-        background: white;
+        background: #fffce0;
         text-align: center;
+        padding: 50px;
+      }
+
+      h1 {
+        color: #c00;
+      }
+
+      .slot-machine-wrapper {
         display: flex;
-        flex-direction: column;
+        justify-content: center;
         align-items: center;
-        min-height: 100vh;
+        margin-top: 40px;
+        gap: 30px;
       }
 
-      .title-marquee-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        width: 80%;
-        max-width: 900px;
-        margin: 20px auto;
-        gap: 20px;
-      }
-
-      h1#pageTitle {
-        font-size: 28px;
-        color: #333;
-        margin: 0;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
-
-      .marquee-container {
-        flex-grow: 1;
+      .reel-box {
+        width: 200px;
         height: 60px;
-        border: 2px solid #333;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #f9f9f9;
+        border: 3px solid #000;
+        border-radius: 10px;
+        background: #fff;
+        font-size: 20px;
+        font-weight: bold;
         display: flex;
         align-items: center;
-        justify-content: flex-start;
-        box-sizing: border-box;
+        justify-content: center;
       }
 
-      .marquee {
-        white-space: nowrap;
-        font-size: 28px;
-        color: #000;
-        padding-left: 100%;
-        animation-timing-function: linear;
-        animation-iteration-count: 1;
-      }
-
-      @keyframes marquee {
-        0% {
-          transform: translateX(0);
-        }
-        100% {
-          transform: translateX(-100%);
-        }
-      }
-
-      .page-info {
-        margin-top: 10px;
-        font-size: 18px;
-        color: #555;
-      }
-
-      .controls {
-        margin-top: 15px;
-      }
-
-      .controls button,
-      .controls input {
-        padding: 6px 12px;
+      button {
+        margin: 10px;
+        padding: 15px 30px;
         font-size: 16px;
-        margin: 0 5px 5px 5px;
+        font-weight: bold;
+        background-color: #ff9900;
+        color: white;
+        border: none;
+        border-radius: 10px;
         cursor: pointer;
       }
 
-      .fullscreen-button {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 14px;
-        padding: 5px 10px;
+      #resetHistoryButton {
+        background-color: #666;
       }
 
-      input[type="number"] {
-        width: 90px;
-        text-align: center;
+      #restartButton {
+        background-color: #0066cc;
       }
 
-      #listArea {
-        margin-top: 20px;
-        max-width: 900px;
-        width: 80%;
-        text-align: left;
-        background: #fafafa;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        padding: 10px;
-        word-break: break-word;
-        overflow-wrap: break-word;
-      }
-
-      #listContent span {
-        display: inline-block;
-        margin-right: 2px;
-        white-space: nowrap;
-        font-size: 16px;
+      #result {
+        margin-top: 30px;
+        font-size: 18px;
         color: #333;
-        line-height: 1.5;
+      }
+
+      #history {
+        margin-top: 40px;
+        text-align: left;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+        background: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        min-height: 100px;
+      }
+
+      #history div {
+        margin-bottom: 5px;
+      }
+
+      #result b {
+        color: #003366;
       }
     </style>
   </head>
   <body>
-    <div class="title-marquee-wrapper">
-      <h1 id="pageTitle">未點名</h1>
-      <div class="marquee-container">
-        <div id="marquee" class="marquee">載入中...</div>
-      </div>
+    <h1>🎰 區域拉霸機</h1>
+
+    <div class="slot-machine-wrapper">
+      <div id="areaReel" class="reel-box">--</div>
+      <div id="numberReel" class="reel-box">--</div>
     </div>
 
-    <div class="page-info">
-      <span id="pageNumber"></span>
-      &nbsp;&nbsp;&nbsp;
-      <label for="durationInput">秒數(10~300)：</label>
-      <input type="number" id="durationInput" min="10" max="300" step="0.1" />
-      <button onclick="resetDuration()">重置秒數</button>
-      <br />
-      <span
-        id="countdown"
-        style="font-size: 14px; color: #888; margin-top: 8px; display: inline-block"
-      >
-        距離更新：-- 秒
-      </span>
-    </div>
+    <button id="drawButton" onclick="startDraw()">開始抽選</button>
+    <button id="retryNumberButton" onclick="retryNumber()" disabled>重抽目前編號</button>
+    <button id="resetHistoryButton" onclick="resetHistory()">清除紀錄</button>
+    <button id="restartButton" onclick="restartAll()">🔄 重新開始</button>
 
-    <div class="controls">
-      <button type="button" onclick="loadData()">🔄 手動更新</button>
-      <button class="fullscreen-button" onclick="toggleFullscreen()">🖥️ 全螢幕</button>
-    </div>
+    <div id="result"></div>
+    <div id="history"><strong>🎯 抽選紀錄：</strong></div>
 
-    <div id="listArea">
-      <strong>名單：</strong>
-      <div id="listContent"></div>
-    </div>
+    <!-- Include PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
     <script>
-      let allItems = [];
-      let manualDuration = null;
-      let currentDuration = null;
-
-      const durationInput = document.getElementById("durationInput");
-      const pageNumber = document.getElementById("pageNumber");
-      const marquee = document.getElementById("marquee");
-      const countdownEl = document.getElementById("countdown");
-      const listContent = document.getElementById("listContent");
-      const pageTitle = document.getElementById("pageTitle");
-
-      let countdownInterval;
-      let countdownRemaining = 0;
-
-      // 你的公開CSV連結
-      const SPREADSHEET_CSV_URL =
-        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTujCzII9O3UmEy3PzyPihnzIpn7geyFPH6hTGNqMJXaeKlzJQngSGYGqq-OHeMvUBccpOhae8hSQeF/pub?output=csv";
-
-      function updateCountdownDisplay() {
-        countdownEl.textContent = `距離更新：${countdownRemaining} 秒`;
-      }
-
-      function startCountdown(durationSeconds) {
-        clearInterval(countdownInterval);
-        countdownRemaining = Math.ceil(durationSeconds);
-        updateCountdownDisplay();
-
-        countdownInterval = setInterval(() => {
-          countdownRemaining--;
-          if (countdownRemaining <= 0) {
-            countdownRemaining = 0;
-            clearInterval(countdownInterval);
-          }
-          updateCountdownDisplay();
-        }, 1000);
-      }
-
-      function updateMarquee() {
-        if (allItems.length === 0) {
-          marquee.textContent = "目前沒有資料";
-          pageNumber.textContent = "";
-          durationInput.value = "";
-          marquee.style.animation = "none";
-          countdownEl.textContent = "距離更新：-- 秒";
-          listContent.innerHTML = "";
-          return;
-        }
-
-        const text = " " + allItems.join(" ｜ ");
-
-        let durationSeconds;
-        if (manualDuration !== null) {
-          durationSeconds = manualDuration;
-        } else {
-          durationSeconds = Math.min(300, Math.max(10, text.length / 15));
-        }
-        currentDuration = durationSeconds;
-
-        marquee.style.animation = "none";
-        void marquee.offsetWidth;
-        marquee.style.animation = `marquee ${durationSeconds}s linear 1`;
-        marquee.textContent = text;
-
-        pageNumber.textContent = "";
-        durationInput.value = durationSeconds.toFixed(1);
-
-        startCountdown(durationSeconds);
-
-        listContent.innerHTML = allItems
-          .map((item) => `<span>${item}、</span>`)
-          .join("");
-      }
-
-      marquee.onanimationend = () => {
-        loadData();
-      };
-
-      async function loadData() {
-        try {
-          const response = await fetch(SPREADSHEET_CSV_URL);
-          if (!response.ok) throw new Error("抓取資料失敗");
-          const csvText = await response.text();
-
-          const lines = csvText.trim().split("\n");
-          const title = lines[0]?.split(",")[0] || "跑馬燈";
-          const items = lines
-            .slice(1)
-            .map((line) => line.split(",")[0])
-            .filter((s) => s);
-
-          pageTitle.textContent = title;
-          allItems = items;
-          updateMarquee();
-        } catch (error) {
-          console.error(error);
-          pageTitle.textContent = "載入資料錯誤";
-          allItems = [];
-          updateMarquee();
-        }
-      }
-
-      durationInput.addEventListener("change", () => {
-        const val = Number(durationInput.value);
-        if (isNaN(val) || val < 10 || val > 300) {
-          alert("請輸入 10 到 300 秒的有效數字");
-          durationInput.value = currentDuration.toFixed(1);
-          return;
-        }
-        manualDuration = val;
-        updateMarquee();
-      });
-
-      function resetDuration() {
-        manualDuration = null;
-        updateMarquee();
-      }
-
-      function toggleFullscreen() {
-        const docEl = document.documentElement;
-        if (!document.fullscreenElement) {
-          docEl.requestFullscreen?.();
-        } else {
-          document.exitFullscreen?.();
-        }
-      }
+      let areaMap = {};
+      let areaNames = [];
+      let drawnMap = {};
+      let lastSelectedArea = null;
 
       window.onload = () => {
-        loadData();
+        // Fetch the CSV from GitHub
+        Papa.parse('https://raw.githubusercontent.com/yourusername/repository-name/main/data/areas.csv', {
+          download: true,
+          header: true,
+          dynamicTyping: true,
+          complete: function(results) {
+            processCSVData(results.data);
+          }
+        });
       };
+
+      function processCSVData(data) {
+        // 假設 CSV 裡面有兩列 "area" 和 "number"
+        areaMap = {};
+        areaNames = [];
+        
+        // 按照區域分組編號
+        data.forEach(row => {
+          if (!areaMap[row.area]) {
+            areaMap[row.area] = [];
+            areaNames.push(row.area);
+          }
+          areaMap[row.area].push(row.number);
+        });
+
+        console.log(areaMap);
+        console.log(areaNames);
+      }
+
+      function startDraw() {
+        document.getElementById('drawButton').disabled = true;
+        document.getElementById('retryNumberButton').disabled = true;
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('areaReel').innerText = '--';
+        document.getElementById('numberReel').innerText = '--';
+        spinAreaFirst();
+      }
+
+      function spinAreaFirst() {
+        const availableAreas = areaNames.filter(area => {
+          if (!drawnMap[area]) return true;
+          return drawnMap[area].length < areaMap[area].length;
+        });
+
+        if (availableAreas.length === 0) {
+          alert("所有區域編號都抽完了，請按「重新開始」重新抽選！");
+          document.getElementById('drawButton').disabled = false;
+          return;
+        }
+
+        const areaReel = document.getElementById('areaReel');
+        let spinDuration = 2000 + Math.random() * 1000;
+        let start = null;
+
+        function animate(time) {
+          if (!start) start = time;
+          const progress = time - start;
+          const i = Math.floor(progress / 80) % availableAreas.length;
+          areaReel.innerText = availableAreas[i];
+
+          if (progress < spinDuration) {
+            requestAnimationFrame(animate);
+          } else {
+            const finalArea = availableAreas[Math.floor(Math.random() * availableAreas.length)];
+            areaReel.innerText = finalArea;
+            lastSelectedArea = finalArea;
+            spinNumber(finalArea);
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      function spinNumber(area) {
+        const allNumbers = areaMap[area];
+        const numberReel = document.getElementById('numberReel');
+
+        if (!allNumbers || allNumbers.length === 0) {
+          numberReel.innerText = '無資料';
+          document.getElementById('drawButton').disabled = false;
+          return;
+        }
+
+        if (!drawnMap[area]) drawnMap[area] = [];
+
+        const remainingNumbers = allNumbers.filter(n => !drawnMap[area].includes(n));
+
+        if (remainingNumbers.length === 0) {
+          numberReel.innerText = '已抽完';
+          document.getElementById('result').innerHTML = `⚠️ <b>${area}</b> 的編號已全部抽完，請按「重新開始」重置`;
+          document.getElementById('drawButton').disabled = false;
+          document.getElementById('retryNumberButton').disabled = true;
+          return;
+        }
+
+        let spinDuration = 2000 + Math.random() * 1000;
+        let start = null;
+
+        function animate(time) {
+          if (!start) start = time;
+          const progress = time - start;
+          const i = Math.floor(progress / 80) % remainingNumbers.length;
+          numberReel.innerText = remainingNumbers[i];
+
+          if (progress < spinDuration) {
+            requestAnimationFrame(animate);
+          } else {
+            const finalNumber = remainingNumbers[Math.floor(Math.random() * remainingNumbers.length)];
+            numberReel.innerText = finalNumber;
+            drawnMap[area].push(finalNumber);
+
+            document.getElementById('result').innerHTML = `
+              👉 選中區域：<b>${area}</b><br>
+              👉 區編號：<b>${finalNumber}</b>
+            `;
+
+            document.getElementById('history').innerHTML += `
+              <div>🔹 <b>${area}</b> - 編號：<b>${finalNumber}</b></div>
+            `;
+
+            document.getElementById('drawButton').disabled = false;
+            document.getElementById('retryNumberButton').disabled = false;
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      function retryNumber() {
+        if (!lastSelectedArea) {
+          alert("請先抽出一個區域！");
+          return;
+        }
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('numberReel').innerText = '--';
+        document.getElementById('drawButton').disabled = true;
+        document.getElementById('retryNumberButton').disabled = true;
+        spinNumber(lastSelectedArea);
+      }
+
+      function resetHistory() {
+        document.getElementById('history').innerHTML = '<strong>🎯 抽選紀錄：</strong>';
+      }
+
+      function restartAll() {
+        drawnMap = {};
+        lastSelectedArea = null;
+        document.getElementById('areaReel').innerText = '--';
+        document.getElementById('numberReel').innerText = '--';
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('history').innerHTML = '<strong>🎯 抽選紀錄：</strong>';
+        document.getElementById('drawButton').disabled = false;
+        document.getElementById('retryNumberButton').disabled = true;
+        alert("所有資料已重置，重新開始抽選！");
+      }
     </script>
   </body>
 </html>
