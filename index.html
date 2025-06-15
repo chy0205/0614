@@ -2,29 +2,28 @@
 <html>
   <head>
     <base target="_top" />
-    <style>
+    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>區域拉霸機</title> <style>
       body {
         font-family: Arial, sans-serif;
         background: #fffce0;
         text-align: center;
         padding: 50px;
+        min-height: 100vh; /* 確保背景至少覆蓋整個視窗高度 */
+        margin: 0; /* 移除預設邊距 */
 
         /* ======= 背景圖設定開始 ======= */
         background-image: url('./001.png'); /* 指定圖片路徑，假設圖片在 index.html 同一目錄 */
         background-repeat: no-repeat;       /* 背景圖片不重複 */
         background-position: center center; /* 圖片水平和垂直都置中 */
-        background-attachment: fixed;       /* 讓背景圖固定，不隨頁面捲動而移動 (可選) */
-        
-        /* === 圖片固定大小設定 === */
-        background-size: 300px 200px; /* <--- 在這裡設定您想要的固定寬度和高度！ */
-                                     /* 例如：'200px 150px' 或 '400px 300px' */
-        /* ===                   === */
-
+        background-attachment: fixed;       /* 讓背景圖固定，不隨頁面捲動而移動 */
+        background-size: 300px 200px;       /* *** 在這裡設定圖片的固定寬度和高度 *** */
+                                            /* 您可以調整 '300px' 和 '200px' 來改變圖片大小 */
         /* ======= 背景圖設定結束 ======= */
       }
 
       h1 {
         color: #c00;
+        margin-bottom: 40px;
       }
 
       .slot-machine-wrapper {
@@ -46,6 +45,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* 添加陰影增加立體感 */
       }
 
       button {
@@ -58,20 +58,41 @@
         border: none;
         border-radius: 10px;
         cursor: pointer;
+        transition: background-color 0.3s ease; /* 按鈕平滑過渡效果 */
+      }
+
+      button:hover {
+        background-color: #e68a00; /* 按鈕懸停效果 */
+      }
+
+      button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
       }
 
       #resetHistoryButton {
         background-color: #666;
       }
+      #resetHistoryButton:hover {
+        background-color: #555;
+      }
 
       #restartButton {
         background-color: #0066cc;
+      }
+      #restartButton:hover {
+        background-color: #005bb5;
       }
 
       #result {
         margin-top: 30px;
         font-size: 18px;
         color: #333;
+        min-height: 40px; /* 確保結果區有足夠高度，避免內容跳動 */
+      }
+
+      #result b {
+        color: #003366;
       }
 
       #history {
@@ -80,19 +101,28 @@
         max-width: 400px;
         margin-left: auto;
         margin-right: auto;
-        background: #fff;
+        background: rgba(255, 255, 255, 0.8); /* 歷史紀錄區塊半透明，能看到背景圖 */
         padding: 15px;
         border-radius: 10px;
         border: 1px solid #ccc;
         min-height: 100px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        overflow-y: auto; /* 紀錄多時可以捲動 */
+        max-height: 250px; /* 設定最大高度 */
+      }
+
+      #history strong {
+        color: #c00;
+        display: block; /* 讓標題獨立一行 */
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
       }
 
       #history div {
         margin-bottom: 5px;
-      }
-
-      #result b {
-        color: #003366;
+        padding-left: 10px;
+        border-left: 3px solid #ff9900;
       }
     </style>
   </head>
@@ -136,7 +166,7 @@
         ],
         "文化傳播": ["001區"],
         "正宗": ["001區", "002區", "003區", "005區", "006區", "007區", "008區"],
-        "崇正": ["區"],
+        "崇正區": [],
         "通化": ["001區", "002區", "003區", "005區"],
         "華德": ["001區", "002區", "003區", "004區", "005區", "006區"],
         "精明": ["001區", "002區", "011區", "013區", "018區", "022區", "024區"],
@@ -144,7 +174,7 @@
       };
 
       let areaNames = [
-        "大德", "中和", "文化傳播", "正宗", "崇正", "通化", "華德", "精明", "賢德"
+        "大德", "中和", "文化傳播", "正宗", "崇正區", "通化", "華德", "精明", "賢德"
       ]; 
 
       // ====================================================================
