@@ -275,17 +275,17 @@
 
         if (!allNumbersWithSuffix || allNumbersWithSuffix.length === 0 || (allNumbersWithSuffix.length === 1 && allNumbersWithSuffix[0] === '區')) {
           // 如果該區域沒有任何實際數字編號可供抽選 (例如"崇正")
-          const displayValue = (allNumbersWithSuffix && allNumbersWithSuffix[0] === '區') ? '單一單位' : '--'; // 針對「崇正區」顯示「單一單位」
+          const displayValue = (allNumbersWithSuffix && allNumbersWithSuffix[0] === '區') ? '區' : '--'; // 針對「崇正區」顯示「單一單位」
           numberReel.innerText = displayValue; // 顯示「單一單位」
 
           // 將這個單一單位標記為已抽取，這樣下次就不會再抽到
           if (!drawnMap[area]) drawnMap[area] = [];
-          if (!drawnMap[area].includes('單一單位')) { // 確保只添加一次
-              drawnMap[area].push('單一單位');
+          if (!drawnMap[area].includes('區')) { // 確保只添加一次
+              drawnMap[area].push('區');
           }
 
           document.getElementById('history').innerHTML += `
-            <div>🔹 <b>${area}</b> (單一單位)</div>
+            <div>🔹 <b>${area}</b> (區)</div>
           `;
           const historyDiv = document.getElementById('history');
           historyDiv.scrollTop = historyDiv.scrollHeight;
