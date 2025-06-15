@@ -2,7 +2,10 @@
 <html>
   <head>
     <base target="_top" />
-    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>區域拉霸機</title> <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>區域拉霸機</title>
+    <style>
       body {
         font-family: Arial, sans-serif;
         background: #fffce0;
@@ -12,12 +15,11 @@
         margin: 0; /* 移除預設邊距 */
 
         /* ======= 背景圖設定開始 ======= */
-        background-image: url('./001.png'); /* 指定圖片路徑，假設圖片在 index.html 同一目錄 */
+        background-image: url('./003.png'); /* 指定圖片路徑，假設圖片在 index.html 同一目錄 */
         background-repeat: no-repeat;       /* 背景圖片不重複 */
         background-position: center center; /* 圖片水平和垂直都置中 */
         background-attachment: fixed;       /* 讓背景圖固定，不隨頁面捲動而移動 */
         background-size: 300px 200px;       /* *** 在這裡設定圖片的固定寬度和高度 *** */
-                                            /* 您可以調整 '300px' 和 '200px' 來改變圖片大小 */
         /* ======= 背景圖設定結束 ======= */
       }
 
@@ -84,6 +86,20 @@
         background-color: #005bb5;
       }
 
+      #musicToggleButton {
+        background-color: #4CAF50; /* 綠色 */
+        position: fixed; /* 固定在螢幕上 */
+        top: 20px;
+        right: 20px;
+        padding: 10px 15px;
+        font-size: 14px;
+        z-index: 1000; /* 確保按鈕在其他內容之上 */
+      }
+      #musicToggleButton:hover {
+        background-color: #45a049;
+      }
+
+
       #result {
         margin-top: 30px;
         font-size: 18px;
@@ -127,6 +143,9 @@
     </style>
   </head>
   <body>
+    <audio id="backgroundMusic" src="./002.mp3" loop preload="auto"></audio>
+    <button id="musicToggleButton" onclick="toggleMusic()">🎵 音樂開 / 關</button>
+
     <h1>🎰 區域拉霸機</h1>
 
     <div class="slot-machine-wrapper">
@@ -175,14 +194,60 @@
 
       let areaNames = [
         "大德", "中和", "文化傳播", "正宗", "崇正區", "通化", "華德", "精明", "賢德"
-      ]; 
+      ];
 
       // ====================================================================
 
       let drawnMap = {};
       let lastSelectedArea = null;
+      let backgroundMusic = document.getElementById('backgroundMusic');
+      let musicToggleBtn = document.getElementById('musicToggleButton');
+      let isMusicPlaying = false; // 追蹤音樂播放狀態
+
+      // 嘗試在網頁載入時播放音樂，但瀏覽器可能阻止
+      // 為了解決自動播放限制，我們改用使用者互動來觸發播放
+      // backgroundMusic.play().catch(error => {
+      //     console.log('音樂自動播放被阻止:', error);
+      //     // 如果自動播放被阻止，可以考慮給予使用者提示或顯示播放按鈕
+      // });
+
+      // 當使用者點擊「開始抽選」按鈕時，嘗試播放音樂（如果尚未播放）
+      document.addEventListener('DOMContentLoaded', () => {
+          // 首次載入時，音樂是靜音的，並顯示「音樂開」
+          backgroundMusic.muted = true;
+          musicToggleBtn.textContent = '🎵 音樂開';
+      });
+
+      function toggleMusic() {
+          if (backgroundMusic.muted) {
+              backgroundMusic.muted = false; // 取消靜音
+              backgroundMusic.play().catch(error => {
+                  console.log('音樂播放失敗:', error);
+                  alert('瀏覽器限制自動播放音樂，請允許網站播放聲音。');
+                  backgroundMusic.muted = true; // 如果播放失敗，再次靜音
+                  musicToggleBtn.textContent = '🎵 音樂開';
+              });
+              musicToggleBtn.textContent = '🔇 音樂關';
+              isMusicPlaying = true;
+          } else {
+              backgroundMusic.muted = true; // 靜音
+              musicToggleBtn.textContent = '🎵 音樂開';
+              isMusicPlaying = false;
+          }
+      }
 
       function startDraw() {
+        // 如果音樂是靜音的，且播放功能允許，嘗試播放音樂
+        if (backgroundMusic.muted) {
+            backgroundMusic.muted = false; // 嘗試取消靜音
+            backgroundMusic.play().catch(error => {
+                console.log('音樂播放失敗 (抽籤時):', error);
+                // 這裡不彈出提示，避免打斷使用者操作
+            });
+            musicToggleBtn.textContent = '🔇 音樂關';
+            isMusicPlaying = true;
+        }
+
         document.getElementById('drawButton').disabled = true;
         document.getElementById('retryNumberButton').disabled = true;
         document.getElementById('result').innerHTML = '';
