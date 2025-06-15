@@ -109,8 +109,8 @@
       let lastSelectedArea = null;
 
       window.onload = () => {
-        // Fetch the CSV from GitHub
-        Papa.parse('https://raw.githubusercontent.com/yourusername/repository-name/main/data/areas.csv', {
+        // Fetch the CSV from Google Sheets URL
+        Papa.parse('https://docs.google.com/spreadsheets/d/e/2PACX-1vR_QEMI5Ad4r6uyqimM-HAO5q1cWQDylJjk_2WeJi19Aa7bogkQi3ZxhMGA-hQHuNq61OFVdENmsYqo/pub?gid=0&single=true&output=csv', {
           download: true,
           header: true,
           dynamicTyping: true,
