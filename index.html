@@ -146,12 +146,22 @@
     <audio id="backgroundMusic" src="./002.mp3" loop preload="auto"></audio>
     <button id="musicToggleButton" onclick="toggleMusic()">🎵 音樂開 / 關</button>
 
-    <h1>🎰 區域拉霸機</h1>
+       <h1>1</h1>
+    <h1> 2</h1>
+    <h1> 2</h1>
+    <h1> 2</h1>
+  
 
     <div class="slot-machine-wrapper">
       <div id="areaReel" class="reel-box">--</div>
       <div id="numberReel" class="reel-box">--</div>
     </div>
+    <br>
+    <br>
+    <br>
+    <br>
+     <br>
+    <br>
 
     <button id="drawButton" onclick="startDraw()">開始抽選</button>
     <button id="retryNumberButton" onclick="retryNumber()" disabled>重抽目前編號</button>
@@ -332,10 +342,10 @@
             numberReel.innerText = finalNumber;
             drawnMap[area].push(finalNumber);
 
-            document.getElementById('result').innerHTML = `
+            /*document.getElementById('result').innerHTML = `
               👉 選中單位：<b>${area}</b><br>
               👉 區：<b>${finalNumber}</b>
-            `;
+            `;*/
 
             document.getElementById('history').innerHTML += `
               <div>🔹 <b>${area}</b> <b>${finalNumber}</b></div>
