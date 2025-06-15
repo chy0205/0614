@@ -20,6 +20,11 @@
         display: none; /* 將音頻播放器隱藏 */
       }
 
+      /* 新增：結束音效的音頻播放器也隱藏 */
+      #finishSound {
+        display: none;
+      }
+
       h1, h4 {
         color: rgba(0, 0, 0, 0); /* 標題隱藏 */
       }
@@ -40,14 +45,24 @@
         font-weight: bold;
         display: flex; /* 保持 flexbox 佈局 */
         align-items: center; /* 垂直置中 */
-        justify-content: center;/* <--- 移除或註解這一行 */
+        justify-content: center; /* 這裡改回置中 */
         /*background-color: rgba(255, 255, 255, 0.8);  半透明白色背景，讓內容更清晰 */
         color: #333; /* 文字顏色 */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 輕微陰影效果 */
-        padding: 0 0px; /* 增加一些內邊距，讓文字不會太貼邊 */
+        padding: 0 10px; /* 增加一些內邊距，讓文字不會太貼邊 */
         box-sizing: border-box; /* 讓 padding 不會增加總寬度 */
       }
 
+      #areaReel {
+        /* 移除或註解掉所有靠右的特定樣式，讓它繼承 .reel-box 的置中 */
+        /* text-align: right; */
+        /* justify-content: flex-end; */
+        /* padding-right: 0px; */
+      }
+
+      #numberReel {
+        text-align: left; /* 編號靠左 */
+        justify-content: flex-start; /* 在 flexbox 中靠左對齊內容 */
       }
 
       button {
@@ -138,6 +153,8 @@
 
     <audio id="spinSound" src="002.mp3" preload="auto"></audio>
 
+    <audio id="finishSound" src="002.mp3" preload="auto"></audio>
+
     <button id="drawButton" onclick="startDraw()">開始抽選</button>
     <button id="retryNumberButton" onclick="retryNumber()" disabled>重抽目前編號</button>
     <button id="resetHistoryButton" onclick="resetHistory()">清除紀錄</button>
@@ -149,7 +166,7 @@
     <script>
       // === 您的區域和編號資料已直接嵌入於此 ===
       let areaMap = {
-        "大德": ["002區"],
+        "大德": ["002區",],
         "中和": [
           "001區", "002區", "003區", "004區", "005區", "006區", "007區", "008區",
           "010區", "011區", "012區", "013區", "014區", "017區", "018區", "019區",
@@ -187,20 +204,26 @@
 
       let drawnMap = {}; // 用於記錄已抽出的編號
       let lastSelectedArea = null; // 記錄上次抽中的區域
-      const spinSound = document.getElementById('spinSound'); // 獲取音頻元素
+      const spinSound = document.getElementById('spinSound'); // 獲取轉動音頻元素
+      const finishSound = document.getElementById('finishSound'); // 新增：獲取結束音頻元素
 
       window.onload = () => {
         // 頁面載入時的初始化操作
       };
 
+      /**
+       * 播放轉動音效。
+       */
       function playSpinSound() {
         if (spinSound) {
           spinSound.currentTime = 0; // 每次播放前重置到開頭
-          // 使用 play() 並捕獲潛在錯誤，特別是在某些瀏覽器上，未經用戶互動可能無法自動播放音頻
-          spinSound.play().catch(e => console.log("音頻播放失敗:", e)); 
+          spinSound.play().catch(e => console.log("轉動音頻播放失敗:", e)); 
         }
       }
 
+      /**
+       * 停止轉動音效。
+       */
       function stopSpinSound() {
         if (spinSound) {
           spinSound.pause(); // 暫停播放
@@ -208,17 +231,40 @@
         }
       }
 
+      /**
+       * 播放結束音效的特定區段。
+       * @param {number} startTime - 音效開始播放的秒數。
+       * @param {number} duration - 音效持續播放的秒數。
+       */
+      function playFinishSound(startTime, duration) {
+        if (finishSound) {
+          finishSound.currentTime = startTime; // 設定播放起點 (秒)
+          finishSound.play().catch(e => console.log("結束音頻播放失敗:", e));
+
+          // 設定在指定秒數後停止
+          setTimeout(() => {
+            finishSound.pause();
+            finishSound.currentTime = 0; // 重置到開頭
+          }, duration * 1000); // duration 是秒數，所以要乘以 1000 轉換為毫秒
+        }
+      }
+
+      /**
+       * 開始抽選流程。
+       */
       function startDraw() {
         document.getElementById('drawButton').disabled = true;
         document.getElementById('retryNumberButton').disabled = true;
-        // 清空結果顯示
         document.getElementById('result').innerHTML = ''; 
         document.getElementById('areaReel').innerText = '--';
         document.getElementById('numberReel').innerText = '--';
-        playSpinSound(); // 開始播放聲音
+        playSpinSound(); // 開始播放轉動音效
         spinAreaFirst();
       }
 
+      /**
+       * 轉動區域輪盤。
+       */
       function spinAreaFirst() {
         // 過濾出還有未抽出編號的區域
         const availableAreas = areaNames.filter(area => {
@@ -240,12 +286,12 @@
         if (availableAreas.length === 0) {
           alert("所有區域編號都抽完了，請按「重新開始」重新抽選！");
           document.getElementById('drawButton').disabled = false;
-          stopSpinSound(); // 停止聲音
+          stopSpinSound(); // 停止轉動音效
           return;
         }
 
         const areaReel = document.getElementById('areaReel');
-        let spinDuration = 2000 + Math.random() * 1000; // 隨機轉動時間
+        let spinDuration = 2000 + Math.random() * 1000; // 隨機轉動時間 (2秒到3秒)
         let start = null; // 動畫開始時間
 
         function animate(time) {
@@ -262,7 +308,7 @@
             areaReel.innerText = finalArea;
             lastSelectedArea = finalArea; // 記錄最終選中的區域
             
-            stopSpinSound(); 
+            stopSpinSound(); // 停止轉動音效
             
             spinNumber(finalArea); // 接著轉動編號
           }
@@ -271,12 +317,16 @@
         requestAnimationFrame(animate); // 啟動動畫
       }
 
+      /**
+       * 轉動編號輪盤。
+       * @param {string} area - 當前選中的區域名稱。
+       */
       function spinNumber(area) {
         const allNumbersWithSuffix = areaMap[area]; // 這裡的編號包含「區」字
         const numberReel = document.getElementById('numberReel');
 
+        // 特殊處理：如果該區域沒有任何實際數字編號可供抽選 (例如"崇正"只有「區」字)
         if (!allNumbersWithSuffix || allNumbersWithSuffix.length === 0 || (allNumbersWithSuffix.length === 1 && allNumbersWithSuffix[0] === '區')) {
-          // 如果該區域沒有任何實際數字編號可供抽選 (例如"崇正")
           const displayValue = (allNumbersWithSuffix && allNumbersWithSuffix[0] === '區') ? '區' : '--'; // 針對「崇正區」顯示「區」字
           numberReel.innerText = displayValue; // 顯示「區」字
 
@@ -291,10 +341,10 @@
           const historyDiv = document.getElementById('history');
           historyDiv.scrollTop = historyDiv.scrollHeight;
 
-          // 移除了 document.getElementById('result').innerHTML 的更新
           document.getElementById('drawButton').disabled = false;
           document.getElementById('retryNumberButton').disabled = true; // 單一單位無法重抽
-          stopSpinSound(); // 停止聲音
+          stopSpinSound(); // 停止轉動音效
+          // 單一單位沒有編號轉動，所以這裡不需要播放結束音效
           return;
         }
 
@@ -305,24 +355,23 @@
 
         if (remainingNumbersWithSuffix.length === 0) {
           numberReel.innerText = '已抽完';
-          // 這裡保留了已抽完的提示，因為這是一個重要的狀態訊息
           document.getElementById('result').innerHTML = `⚠️ <b>${area}</b> 的編號已全部抽完，請按「重新開始」重置`;
           document.getElementById('drawButton').disabled = false;
           document.getElementById('retryNumberButton').disabled = true; // 該區域已抽完，無法重抽
-          stopSpinSound(); // 停止聲音
+          stopSpinSound(); // 停止轉動音效
           return;
         }
 
-        playSpinSound(); // 開始播放聲音（如果編號轉動也需要聲音）
-        let spinDuration = 2000 + Math.random() * 1000; // 隨機轉動時間
+        // 如果您希望編號轉動時也有轉動音效，請取消註解下面這行
+        // playSpinSound(); 
+        let spinDuration = 2000 + Math.random() * 1000; // 隨機轉動時間 (2秒到3秒)
         let start = null; // 動畫開始時間
 
         function animate(time) {
           if (!start) start = time;
           const progress = time - start;
           const i = Math.floor(progress / 80) % remainingNumbersWithSuffix.length; // 每80毫秒更換一次顯示的編號
-          // 顯示時保留「區」字
-          numberReel.innerText = remainingNumbersWithSuffix[i];
+          numberReel.innerText = remainingNumbersWithSuffix[i]; // 顯示時保留「區」字
 
           if (progress < spinDuration) {
             requestAnimationFrame(animate); // 繼續動畫
@@ -341,16 +390,23 @@
             const historyDiv = document.getElementById('history');
             historyDiv.scrollTop = historyDiv.scrollHeight;
 
-            // 移除了 document.getElementById('result').innerHTML 的更新
             document.getElementById('drawButton').disabled = false; // 啟用開始抽選按鈕
             document.getElementById('retryNumberButton').disabled = false; // 啟用重抽按鈕
-            stopSpinSound(); // 停止聲音
+            stopSpinSound(); // 停止轉動音效
+
+            // 播放結束音效。您可以調整這兩個參數：
+            // 第一個參數：音效開始播放的秒數 (例如 1.5 代表從 finish.mp3 的第 1.5 秒開始)
+            // 第二個參數：音效持續播放的秒數 (例如 3 代表播放 3 秒)
+            playFinishSound(9, 2); 
           }
         }
 
         requestAnimationFrame(animate); // 啟動動畫
       }
 
+      /**
+       * 重抽目前編號。
+       */
       function retryNumber() {
         if (!lastSelectedArea) {
           alert("請先抽出一個區域！");
@@ -363,7 +419,6 @@
             return;
         }
 
-        // 清空結果顯示 (在重抽前也應該清空)
         document.getElementById('result').innerHTML = ''; 
         document.getElementById('numberReel').innerText = '--';
         document.getElementById('drawButton').disabled = true;
@@ -371,23 +426,31 @@
 
         // 在重抽之前，將上次抽出的編號從 drawnMap 中移除，使其可以再次被選中
         if (drawnMap[lastSelectedArea] && drawnMap[lastSelectedArea].length > 0) {
-            // 移除最後一個元素（包含「區」字尾的編號）
-            drawnMap[lastSelectedArea].pop(); 
+            drawnMap[lastSelectedArea].pop(); // 移除最後一個元素（包含「區」字尾的編號）
             // 同步移除歷史記錄中的最後一個項目
             const historyDiv = document.getElementById('history');
-            // 找到最後一個 'div' 元素 (避免刪除 'strong' 標籤)
             if (historyDiv.lastElementChild && historyDiv.lastElementChild.tagName === 'DIV') {
                 historyDiv.removeChild(historyDiv.lastElementChild);
             }
         }
+        // 重抽時，確保停止結束音效，避免多個音效疊加
+        if (finishSound) {
+          finishSound.pause();
+          finishSound.currentTime = 0;
+        }
         spinNumber(lastSelectedArea); // 重新轉動編號
       }
 
-
+      /**
+       * 清除歷史紀錄。
+       */
       function resetHistory() {
         document.getElementById('history').innerHTML = '<strong>🎯 抽選紀錄：</strong>';
       }
 
+      /**
+       * 重置所有抽獎資料，重新開始。
+       */
       function restartAll() {
         drawnMap = {}; // 清空所有已抽出的記錄
         lastSelectedArea = null; // 清空上次選中的區域
@@ -398,6 +461,13 @@
         document.getElementById('drawButton').disabled = false; // 啟用開始抽選按鈕
         document.getElementById('retryNumberButton').disabled = true; // 禁用重抽按鈕
         alert("所有資料已重置，重新開始抽選！");
+
+        // 重新開始時，停止所有音效
+        stopSpinSound();
+        if (finishSound) {
+          finishSound.pause();
+          finishSound.currentTime = 0;
+        }
       }
     </script>
   </body>
