@@ -99,45 +99,45 @@
     <div id="result"></div>
     <div id="history"><strong>🎯 抽選紀錄：</strong></div>
 
-    <!-- Include PapaParse for CSV parsing -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-
     <script>
-      let areaMap = {};
-      let areaNames = [];
-      let drawnMap = {};
-      let lastSelectedArea = null;
-
-      // Load CSV from a URL and process the data
-      window.onload = () => {
-        // Fetch the CSV directly from the URL
-        Papa.parse('https://docs.google.com/spreadsheets/d/e/2PACX-1vR_QEMI5Ad4r6uyqimM-HAO5q1cWQDylJjk_2WeJi19Aa7bogkQi3ZxhMGA-hQHuNq61OFVdENmsYqo/pub?gid=0&single=true&output=csv', {
-          download: true,
-          header: true,
-          dynamicTyping: true,
-          complete: function(results) {
-            processCSVData(results.data);
-          }
-        });
+      // ====================================================================
+      // *** 這是根據您提供的最新資料生成的 `areaMap` 和 `areaNames` ***
+      // ====================================================================
+      let areaMap = {
+        "大德": ["002區", "003區"],
+        "中和": [
+          "001區", "002區", "003區", "004區", "005區", "006區", "007區", "008區",
+          "010區", "011區", "012區", "013區", "014區", "017區", "018區", "019區",
+          "020區", "021區", "022區", "023區", "024區", "025區", "026區", "027區",
+          "028區", "029區", "030區", "031區", "032區", "033區", "034區", "035區",
+          "036區", "038區", "039區", "040區", "041區", "042區", "043區", "044區",
+          "045區", "047區", "048區", "049區", "050區", "051區", "052區", "053區",
+          "054區", "055區", "056區", "057區", "058區", "059區", "062區", "063區",
+          "064區", "065區", "066區", "067區", "068區", "069區", "070區", "071區",
+          "072區", "075區", "076區", "077區", "078區", "080區", "081區", "082區",
+          "083區", "084區", "085區", "087區", "088區", "089區", "090區", "092區",
+          "093區", "094區", "095區", "096區", "097區", "098區", "099區", "100區",
+          "101區", "102區", "103區", "104區", "105區", "106區", "107區", "108區",
+          "109區", "110區", "111區", "112區", "113區", "114區", "115區", "117區",
+          "118區"
+        ],
+        "文化傳播": ["001區"],
+        "正宗": ["001區", "002區", "003區", "005區", "006區", "007區", "008區"],
+        "崇正區": [],
+        "通化": ["001區", "002區", "003區", "005區"],
+        "華德": ["001區", "002區", "003區", "004區", "005區", "006區"],
+        "精明": ["001區", "002區", "011區", "013區", "018區", "022區", "024區"],
+        "賢德": ["001區", "002區", "003區"]
       };
 
-      function processCSVData(data) {
-        // Initialize areaMap and areaNames
-        areaMap = {};
-        areaNames = [];
+      let areaNames = [
+        "大德", "中和", "文化傳播", "正宗", "崇正區", "通化", "華德", "精明", "賢德"
+      ]; 
 
-        // Group data by area
-        data.forEach(row => {
-          if (!areaMap[row.area]) {
-            areaMap[row.area] = [];
-            areaNames.push(row.area);
-          }
-          areaMap[row.area].push(row.number);
-        });
+      // ====================================================================
 
-        console.log(areaMap);  // To check the processed data
-        console.log(areaNames); // To check the available area names
-      }
+      let drawnMap = {};
+      let lastSelectedArea = null;
 
       function startDraw() {
         document.getElementById('drawButton').disabled = true;
@@ -151,8 +151,10 @@
       function spinAreaFirst() {
         const availableAreas = areaNames.filter(area => {
           if (!drawnMap[area]) return true;
-          return drawnMap[area].length < areaMap[area].length;
+          // 檢查是否還有未抽的號碼
+          return areaMap[area].filter(n => !drawnMap[area].includes(n)).length > 0;
         });
+
 
         if (availableAreas.length === 0) {
           alert("所有區域編號都抽完了，請按「重新開始」重新抽選！");
@@ -189,7 +191,9 @@
 
         if (!allNumbers || allNumbers.length === 0) {
           numberReel.innerText = '無資料';
+          document.getElementById('result').innerHTML = `⚠️ <b>${area}</b> 沒有可抽取的編號。請按「重新開始」重置或選擇其他區域。`;
           document.getElementById('drawButton').disabled = false;
+          document.getElementById('retryNumberButton').disabled = true;
           return;
         }
 
@@ -222,12 +226,12 @@
             drawnMap[area].push(finalNumber);
 
             document.getElementById('result').innerHTML = `
-              👉 選中區域：<b>${area}</b><br>
-              👉 區編號：<b>${finalNumber}</b>
+              👉 選中單位：<b>${area}</b><br>
+              👉 區：<b>${finalNumber}</b>
             `;
 
             document.getElementById('history').innerHTML += `
-              <div>🔹 <b>${area}</b> - 編號：<b>${finalNumber}</b></div>
+              <div>🔹 <b>${area}</b> <b>${finalNumber}</b></div>
             `;
 
             document.getElementById('drawButton').disabled = false;
