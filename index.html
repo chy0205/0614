@@ -108,8 +108,9 @@
       let drawnMap = {};
       let lastSelectedArea = null;
 
+      // Load CSV from a URL and process the data
       window.onload = () => {
-        // Fetch the CSV from Google Sheets URL
+        // Fetch the CSV directly from the URL
         Papa.parse('https://docs.google.com/spreadsheets/d/e/2PACX-1vR_QEMI5Ad4r6uyqimM-HAO5q1cWQDylJjk_2WeJi19Aa7bogkQi3ZxhMGA-hQHuNq61OFVdENmsYqo/pub?gid=0&single=true&output=csv', {
           download: true,
           header: true,
@@ -121,11 +122,11 @@
       };
 
       function processCSVData(data) {
-        // 假設 CSV 裡面有兩列 "area" 和 "number"
+        // Initialize areaMap and areaNames
         areaMap = {};
         areaNames = [];
-        
-        // 按照區域分組編號
+
+        // Group data by area
         data.forEach(row => {
           if (!areaMap[row.area]) {
             areaMap[row.area] = [];
@@ -134,8 +135,8 @@
           areaMap[row.area].push(row.number);
         });
 
-        console.log(areaMap);
-        console.log(areaNames);
+        console.log(areaMap);  // To check the processed data
+        console.log(areaNames); // To check the available area names
       }
 
       function startDraw() {
